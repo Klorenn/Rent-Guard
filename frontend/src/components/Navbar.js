@@ -132,7 +132,7 @@ const NetworkBadge = styled.div`
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const { wallet, account, connectWallet, disconnectWallet, network } = useStellar();
+  const { wallet, account, connectWallet, disconnectWallet, network, walletType } = useStellar();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -170,6 +170,13 @@ function Navbar() {
           <WalletInfo>
             <Wallet size={18} />
             <WalletAddress>{formatAddress(wallet.publicKey)}</WalletAddress>
+            <div style={{ 
+              fontSize: '0.8rem', 
+              color: '#888',
+              marginLeft: '0.5rem'
+            }}>
+              {walletType === 'freighter' ? '🔗' : '🔑'}
+            </div>
             <NetworkBadge network={network}>{network}</NetworkBadge>
             <button onClick={disconnectWallet} style={{ 
               background: 'none', 

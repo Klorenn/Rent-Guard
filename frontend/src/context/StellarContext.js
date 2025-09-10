@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import freighterService from '../services/freighterService';
 
 const StellarContext = createContext();
 
@@ -20,7 +21,9 @@ const initialState = {
   network: 'testnet',
   wallet: null,
   account: null,
-  error: null
+  error: null,
+  freighterAvailable: false,
+  walletType: null // 'freighter' or 'manual'
 };
 
 // Reducer
@@ -35,9 +38,13 @@ function stellarReducer(state, action) {
     case ACTIONS.SET_ACCOUNT:
       return { ...state, account: action.payload, error: null };
     case ACTIONS.CLEAR_WALLET:
-      return { ...state, wallet: null, account: null, error: null };
+      return { ...state, wallet: null, account: null, error: null, walletType: null };
     case ACTIONS.SET_ERROR:
       return { ...state, error: action.payload, loading: false };
+    case 'SET_FREIGHTER_AVAILABLE':
+      return { ...state, freighterAvailable: action.payload };
+    case 'SET_WALLET_TYPE':
+      return { ...state, walletType: action.payload };
     default:
       return state;
   }
@@ -240,9 +247,99 @@ export function StellarProvider({ children }) {
     }
   };
 
-  // Load network info on mount
+  // Connect with Freighter
+  const connectFreighter = async () => {
+    try {
+      dispatch({ type: ACTIONS.SET_LOADING, payload: true });
+      
+      const accountInfo = await freighterService.requestAccess();
+      
+      const wallet = {
+        publicKey: accountInfo.publicKey,
+        secretKey: null, // Freighter doesn't expose secret keys
+        type: 'freighter'
+      };
+      
+      dispatch({ type: ACTIONS.SET_WALLET, payload: wallet });
+      dispatch({ type: 'SET_WALLET_TYPE', payload: 'freighter' });
+      
+      // Load account info
+      await loadAccount(wallet.publicKey);
+      
+      toast.success('Connected to Freighter wallet!');
+    } catch (error) {
+      const errorMessage = error.message;
+      dispatch({ type: ACTIONS.SET_ERROR, payload: errorMessage });
+      toast.error(`Failed to connect Freighter: ${errorMessage}`);
+    } finally {
+      dispatch({ type: ACTIONS.SET_LOADING, payload: false });
+    }
+  };
+
+  // Check Freighter availability
+  const checkFreighterAvailability = async () => {
+    const isAvailable = await freighterService.checkAvailability();
+    dispatch({ type: 'SET_FREIGHTER_AVAILABLE', payload: isAvailable });
+    return isAvailable;
+  };
+
+  // Send payment with Freighter
+  const sendPaymentWithFreighter = async (destinationPublicKey, amount, asset = 'XLM', memo = '') => {
+    try {
+      if (!state.wallet || state.walletType !== 'freighter') {
+        throw new Error('Freighter wallet not connected');
+      }
+      
+      dispatch({ type: ACTIONS.SET_LOADING, payload: true });
+      
+      // Create payment transaction
+      const paymentResponse = await axios.post(`${API_BASE}/stellar/payment`, {
+        sourceSecret: null, // We'll handle this differently for Freighter
+        destinationPublicKey,
+        amount,
+        asset,
+        memo
+      });
+      
+      if (!paymentResponse.data.success) {
+        throw new Error(paymentResponse.data.error);
+      }
+      
+      // Sign with Freighter
+      const signedXdr = await freighterService.signTransaction(
+        paymentResponse.data.transaction,
+        state.network
+      );
+      
+      // Submit transaction
+      const submitResponse = await axios.post(`${API_BASE}/stellar/submit`, {
+        transactionXdr: signedXdr
+      });
+      
+      if (submitResponse.data.success) {
+        toast.success('Payment sent successfully!');
+        
+        // Refresh account info
+        await loadAccount(state.wallet.publicKey);
+        
+        return submitResponse.data.result;
+      } else {
+        throw new Error(submitResponse.data.error);
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message;
+      dispatch({ type: ACTIONS.SET_ERROR, payload: errorMessage });
+      toast.error(`Payment failed: ${errorMessage}`);
+      throw error;
+    } finally {
+      dispatch({ type: ACTIONS.SET_LOADING, payload: false });
+    }
+  };
+
+  // Load network info and check Freighter on mount
   useEffect(() => {
     getNetworkInfo();
+    checkFreighterAvailability();
   }, []);
 
   const value = {
@@ -253,7 +350,10 @@ export function StellarProvider({ children }) {
     loadAccount,
     connectWallet,
     disconnectWallet,
-    sendPayment
+    sendPayment,
+    connectFreighter,
+    checkFreighterAvailability,
+    sendPaymentWithFreighter
   };
 
   return (

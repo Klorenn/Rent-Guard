@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useStellar } from '../context/StellarContext';
 import toast from 'react-hot-toast';
+import FreighterInfo from '../components/FreighterInfo';
 
 const Container = styled.div`
   max-width: 1000px;
@@ -311,7 +312,10 @@ function Wallet() {
     connectWallet, 
     disconnectWallet, 
     loadAccount,
-    sendPayment 
+    sendPayment,
+    connectFreighter,
+    freighterAvailable,
+    walletType
   } = useStellar();
   
   const [showSecret, setShowSecret] = useState(false);
@@ -386,11 +390,14 @@ function Wallet() {
       </Header>
 
       {!wallet ? (
-        <WalletSection>
-          <SectionTitle>
-            <WalletIcon size={24} />
-            Connect or Create Wallet
-          </SectionTitle>
+        <>
+          <FreighterInfo />
+          
+          <WalletSection>
+            <SectionTitle>
+              <WalletIcon size={24} />
+              Connect or Create Wallet
+            </SectionTitle>
           
           <FormGroup>
             <Label>Secret Key (Connect existing wallet)</Label>
@@ -408,10 +415,27 @@ function Wallet() {
           </FormGroup>
 
           <ActionButtons>
+            {freighterAvailable && (
+              <ActionButton variant="primary" onClick={connectFreighter} disabled={loading}>
+                {loading ? (
+                  <LoadingSpinner
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  />
+                ) : (
+                  <>
+                    <WalletIcon size={18} />
+                    Connect with Freighter
+                  </>
+                )}
+              </ActionButton>
+            )}
+            
             <ActionButton onClick={handleConnectWallet} disabled={!secretKey.trim()}>
               <Key size={18} />
-              Connect Wallet
+              Connect with Secret Key
             </ActionButton>
+            
             <ActionButton variant="primary" onClick={handleGenerateWallet} disabled={loading}>
               {loading ? (
                 <LoadingSpinner
@@ -426,7 +450,8 @@ function Wallet() {
               )}
             </ActionButton>
           </ActionButtons>
-        </WalletSection>
+          </WalletSection>
+        </>
       ) : (
         <>
           <WalletSection>
@@ -446,16 +471,25 @@ function Wallet() {
                 </InfoValue>
               </InfoCard>
               
+              {walletType === 'manual' && wallet.secretKey && (
+                <InfoCard>
+                  <InfoLabel>Secret Key</InfoLabel>
+                  <InfoValue>
+                    {showSecret ? formatAddress(wallet.secretKey) : '••••••••••••••••'}
+                    <CopyButton onClick={() => copyToClipboard(wallet.secretKey)}>
+                      <Copy size={16} />
+                    </CopyButton>
+                    <CopyButton onClick={() => setShowSecret(!showSecret)}>
+                      {showSecret ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </CopyButton>
+                  </InfoValue>
+                </InfoCard>
+              )}
+              
               <InfoCard>
-                <InfoLabel>Secret Key</InfoLabel>
+                <InfoLabel>Wallet Type</InfoLabel>
                 <InfoValue>
-                  {showSecret ? formatAddress(wallet.secretKey) : '••••••••••••••••'}
-                  <CopyButton onClick={() => copyToClipboard(wallet.secretKey)}>
-                    <Copy size={16} />
-                  </CopyButton>
-                  <CopyButton onClick={() => setShowSecret(!showSecret)}>
-                    {showSecret ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </CopyButton>
+                  {walletType === 'freighter' ? '🔗 Freighter Wallet' : '🔑 Manual Wallet'}
                 </InfoValue>
               </InfoCard>
             </WalletInfo>
