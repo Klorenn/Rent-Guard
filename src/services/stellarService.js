@@ -8,11 +8,9 @@ class StellarService {
     this.server = new StellarSdk.Horizon.Server(this.horizonUrl);
     
     // Set network passphrase
-    if (this.network === 'mainnet') {
-      StellarSdk.Networks.PUBLIC;
-    } else {
-      StellarSdk.Networks.TESTNET;
-    }
+    this.networkPassphrase = this.network === 'mainnet' 
+      ? StellarSdk.Networks.PUBLIC 
+      : StellarSdk.Networks.TESTNET;
   }
 
   // Switch between testnet and mainnet
@@ -24,11 +22,9 @@ class StellarService {
     
     this.server = new StellarSdk.Horizon.Server(this.horizonUrl);
     
-    if (network === 'mainnet') {
-      StellarSdk.Networks.PUBLIC;
-    } else {
-      StellarSdk.Networks.TESTNET;
-    }
+    this.networkPassphrase = network === 'mainnet' 
+      ? StellarSdk.Networks.PUBLIC 
+      : StellarSdk.Networks.TESTNET;
   }
 
   // Generate a new keypair
@@ -97,9 +93,7 @@ class StellarService {
 
       const transaction = new StellarSdk.TransactionBuilder(sourceAccount, {
         fee: StellarSdk.BASE_FEE,
-        networkPassphrase: this.network === 'mainnet' 
-          ? StellarSdk.Networks.PUBLIC 
-          : StellarSdk.Networks.TESTNET
+        networkPassphrase: this.networkPassphrase
       })
       .addOperation(StellarSdk.Operation.payment({
         destination: destinationPublicKey,
@@ -125,9 +119,7 @@ class StellarService {
   // Submit transaction
   async submitTransaction(transactionXdr) {
     try {
-      const transaction = StellarSdk.TransactionBuilder.fromXDR(transactionXdr, this.network === 'mainnet' 
-        ? StellarSdk.Networks.PUBLIC 
-        : StellarSdk.Networks.TESTNET);
+      const transaction = StellarSdk.TransactionBuilder.fromXDR(transactionXdr, this.networkPassphrase);
       
       const result = await this.server.submitTransaction(transaction);
       return { success: true, result };
@@ -166,9 +158,7 @@ class StellarService {
     return {
       network: this.network,
       horizonUrl: this.horizonUrl,
-      passphrase: this.network === 'mainnet' 
-        ? StellarSdk.Networks.PUBLIC 
-        : StellarSdk.Networks.TESTNET
+      passphrase: this.networkPassphrase
     };
   }
 }
