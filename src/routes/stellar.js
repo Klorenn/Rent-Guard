@@ -62,8 +62,8 @@ router.post('/keypair', (req, res) => {
     const keypair = stellarService.generateKeypair();
     res.json({
       success: true,
-      publicKey: keypair.publicKey(),
-      secretKey: keypair.secret()
+      publicKey: keypair.publicKey,
+      secretKey: keypair.secretKey
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -132,7 +132,7 @@ router.post('/payment', async (req, res) => {
     const { sourceSecret, destinationPublicKey, amount, asset, memo } = value;
     
     // Create keypair from secret
-    const sourceKeypair = StellarSdk.Keypair.fromSecret(sourceSecret);
+    const sourceKeypair = StellarSdk.Keypair.fromSecretKey(sourceSecret);
     
     const result = await stellarService.createPaymentTransaction(
       sourceKeypair,

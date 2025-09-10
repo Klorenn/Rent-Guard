@@ -62,7 +62,7 @@ describe('Stellar Service', () => {
       
       expect(StellarSdk.Keypair.random).toHaveBeenCalled();
       expect(keypair).toHaveProperty('publicKey');
-      expect(keypair).toHaveProperty('secret');
+      expect(keypair).toHaveProperty('secretKey');
     });
   });
 

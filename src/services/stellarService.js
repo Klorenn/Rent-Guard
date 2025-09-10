@@ -29,7 +29,11 @@ class StellarService {
 
   // Generate a new keypair
   generateKeypair() {
-    return StellarSdk.Keypair.random();
+    const keypair = StellarSdk.Keypair.random();
+    return {
+      publicKey: keypair.publicKey(),
+      secretKey: keypair.secret()
+    };
   }
 
   // Create account

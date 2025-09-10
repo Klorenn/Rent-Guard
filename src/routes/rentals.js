@@ -116,7 +116,7 @@ router.post('/payment', async (req, res) => {
     }
     
     // Create payment transaction
-    const sourceKeypair = StellarSdk.Keypair.fromSecret(sourceSecret);
+    const sourceKeypair = StellarSdk.Keypair.fromSecretKey(sourceSecret);
     const paymentMemo = memo || `Rent payment for ${rentalId}`;
     
     const transactionResult = await stellarService.createPaymentTransaction(
