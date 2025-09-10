@@ -1,0 +1,39 @@
+{
+  "name": "rentguard",
+  "version": "1.0.0",
+  "description": "A Stellar-based rental property management and payment system",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node start.js",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "nodemon src/server.js",
+    "client": "cd frontend && npm start",
+    "build": "cd frontend && npm run build",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "install-all": "npm install && cd frontend && npm install",
+    "setup": "npm run install-all && echo 'Setup complete! Run npm start to begin'"
+  },
+  "keywords": ["stellar", "blockchain", "rental", "payments", "defi"],
+  "author": "RentGuard Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "stellar-sdk": "^11.2.0",
+    "axios": "^1.6.0",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "express-rate-limit": "^7.1.5",
+    "joi": "^17.11.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "concurrently": "^8.2.2",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "@types/jest": "^29.5.8"
+  }
+}
