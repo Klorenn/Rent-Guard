@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { 
-  Wallet, 
+  Wallet as WalletIcon, 
   Key, 
   Copy, 
   Eye, 
@@ -388,7 +388,7 @@ function Wallet() {
       {!wallet ? (
         <WalletSection>
           <SectionTitle>
-            <Wallet size={24} />
+            <WalletIcon size={24} />
             Connect or Create Wallet
           </SectionTitle>
           
@@ -431,7 +431,7 @@ function Wallet() {
         <>
           <WalletSection>
             <SectionTitle>
-              <Wallet size={24} />
+              <WalletIcon size={24} />
               Wallet Information
             </SectionTitle>
             
