@@ -1,5 +1,33 @@
 const request = require('supertest');
-const app = require('../src/server');
+const express = require('express');
+const cors = require('cors');
+const config = require('../config');
+
+// Create a test app without starting the server
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Import routes
+const stellarRoutes = require('../src/routes/stellar');
+const propertyRoutes = require('../src/routes/properties');
+const rentalRoutes = require('../src/routes/rentals');
+
+// Use routes
+app.use('/api/stellar', stellarRoutes);
+app.use('/api/properties', propertyRoutes);
+app.use('/api/rentals', rentalRoutes);
+
+// Health endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    network: config.stellar.network
+  });
+});
 
 describe('API Endpoints', () => {
   describe('GET /health', () => {

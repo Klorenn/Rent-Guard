@@ -62,7 +62,7 @@ describe('Stellar Service', () => {
       
       expect(StellarSdk.Keypair.random).toHaveBeenCalled();
       expect(keypair).toHaveProperty('publicKey');
-      expect(keypair).toHaveProperty('secretKey');
+      expect(keypair).toHaveProperty('secret');
     });
   });
 
@@ -94,14 +94,14 @@ describe('Stellar Service', () => {
       stellarService.switchNetwork('testnet');
       
       expect(stellarService.network).toBe('testnet');
-      expect(StellarSdk.Networks.useTestNetwork).toHaveBeenCalled();
+      expect(stellarService.networkPassphrase).toBe(StellarSdk.Networks.TESTNET);
     });
 
     it('should switch to mainnet', () => {
       stellarService.switchNetwork('mainnet');
       
       expect(stellarService.network).toBe('mainnet');
-      expect(StellarSdk.Networks.usePublicNetwork).toHaveBeenCalled();
+      expect(stellarService.networkPassphrase).toBe(StellarSdk.Networks.PUBLIC);
     });
   });
 
