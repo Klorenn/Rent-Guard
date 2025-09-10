@@ -5,13 +5,13 @@ class StellarService {
   constructor() {
     this.network = config.stellar.network;
     this.horizonUrl = config.stellar.horizonUrl;
-    this.server = new StellarSdk.Server(this.horizonUrl);
+    this.server = new StellarSdk.Horizon.Server(this.horizonUrl);
     
     // Set network passphrase
     if (this.network === 'mainnet') {
-      StellarSdk.Networks.usePublicNetwork();
+      StellarSdk.Networks.PUBLIC;
     } else {
-      StellarSdk.Networks.useTestNetwork();
+      StellarSdk.Networks.TESTNET;
     }
   }
 
@@ -22,12 +22,12 @@ class StellarService {
       ? config.stellar.mainnetHorizonUrl 
       : config.stellar.testnetHorizonUrl;
     
-    this.server = new StellarSdk.Server(this.horizonUrl);
+    this.server = new StellarSdk.Horizon.Server(this.horizonUrl);
     
     if (network === 'mainnet') {
-      StellarSdk.Networks.usePublicNetwork();
+      StellarSdk.Networks.PUBLIC;
     } else {
-      StellarSdk.Networks.useTestNetwork();
+      StellarSdk.Networks.TESTNET;
     }
   }
 
